@@ -2,7 +2,7 @@
 
 import httpx
 from typing import List, Dict, Any, Optional
-from .config import OPENROUTER_API_KEY, OPENROUTER_API_URL
+from .config import settings, OPENROUTER_API_URL
 
 
 async def query_model(
@@ -22,7 +22,7 @@ async def query_model(
         Response dict with 'content' and optional 'reasoning_details', or None if failed
     """
     headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
     }
 
@@ -43,6 +43,15 @@ async def query_model(
             data = response.json()
             message = data['choices'][0]['message']
 
+            # Log success
+            from . import storage
+            storage.add_log({
+                "model": model,
+                "status": "success",
+                "details": "Response received",
+                "type": "api_call"
+            })
+
             return {
                 'content': message.get('content'),
                 'reasoning_details': message.get('reasoning_details')
@@ -50,6 +59,14 @@ async def query_model(
 
     except Exception as e:
         print(f"Error querying model {model}: {e}")
+        # Log failure
+        from . import storage
+        storage.add_log({
+            "model": model,
+            "status": "error",
+            "details": str(e),
+            "type": "api_call"
+        })
         return None
 
 

@@ -156,17 +156,68 @@ def add_assistant_message(
     save_conversation(conversation)
 
 
-def update_conversation_title(conversation_id: str, title: str):
-    """
-    Update the title of a conversation.
-
-    Args:
-        conversation_id: Conversation identifier
-        title: New title for the conversation
-    """
-    conversation = get_conversation(conversation_id)
-    if conversation is None:
-        raise ValueError(f"Conversation {conversation_id} not found")
-
     conversation["title"] = title
     save_conversation(conversation)
+
+
+# --- Logging System ---
+
+LOGS_FILE = "logs.json"
+
+def get_logs_path() -> str:
+    """Get the file path for logs."""
+    return os.path.join(DATA_DIR, LOGS_FILE)
+
+def add_log(entry: Dict[str, Any]):
+    """
+    Add a log entry.
+    
+    Args:
+        entry: Log entry dict containing model, status, etc.
+    """
+    ensure_data_dir()
+    path = get_logs_path()
+    
+    logs = []
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            try:
+                logs = json.load(f)
+            except json.JSONDecodeError:
+                logs = []
+    
+    # Add timestamp/id if missing
+    if "timestamp" not in entry:
+        entry["timestamp"] = datetime.utcnow().isoformat()
+    if "id" not in entry:
+        import uuid
+        entry["id"] = str(uuid.uuid4())
+        
+    logs.append(entry)
+    
+    # Keep only last 1000 logs to prevent infinite growth
+    if len(logs) > 1000:
+        logs = logs[-1000:]
+        
+    with open(path, 'w') as f:
+        json.dump(logs, f, indent=2)
+
+def get_logs() -> List[Dict[str, Any]]:
+    """
+    Get all logs, sorted by newest first.
+    
+    Returns:
+        List of log entries
+    """
+    path = get_logs_path()
+    if not os.path.exists(path):
+        return []
+        
+    with open(path, 'r') as f:
+        try:
+            logs = json.load(f)
+            # Sort by timestamp descending (newest first)
+            logs.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+            return logs
+        except json.JSONDecodeError:
+            return []

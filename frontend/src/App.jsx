@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
+import SettingsModal from './components/SettingsModal';
 import { api } from './api';
 import './App.css';
 
@@ -9,10 +10,14 @@ function App() {
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // New state for sidebar
+  const [appSettings, setAppSettings] = useState(null); // New state for app settings
 
-  // Load conversations on mount
+  // Load conversations and app settings on mount
   useEffect(() => {
     loadConversations();
+    fetchAppSettings(); // Fetch app settings
   }, []);
 
   // Load conversation details when selected
@@ -21,6 +26,16 @@ function App() {
       loadConversation(currentConversationId);
     }
   }, [currentConversationId]);
+
+  const fetchAppSettings = async () => {
+    try {
+      const res = await fetch('http://localhost:8001/api/settings');
+      const data = await res.json();
+      setAppSettings(data);
+    } catch (err) {
+      console.error("Failed to fetch settings", err);
+    }
+  };
 
   const loadConversations = async () => {
     try {
@@ -48,6 +63,10 @@ function App() {
         ...conversations,
       ]);
       setCurrentConversationId(newConv.id);
+      // Close sidebar on mobile
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      }
     } catch (error) {
       console.error('Failed to create conversation:', error);
     }
@@ -55,6 +74,10 @@ function App() {
 
   const handleSelectConversation = (id) => {
     setCurrentConversationId(id);
+    // On mobile, close sidebar when selecting
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
   };
 
   const handleSendMessage = async (content) => {
@@ -182,17 +205,47 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className="app-container">
       <Sidebar
         conversations={conversations}
-        currentConversationId={currentConversationId}
-        onSelectConversation={handleSelectConversation}
-        onNewConversation={handleNewConversation}
+        currentId={currentConversationId}
+        onSelect={handleSelectConversation}
+        onNew={handleNewConversation}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        timezone={appSettings?.timezone}
       />
-      <ChatInterface
-        conversation={currentConversation}
-        onSendMessage={handleSendMessage}
-        isLoading={isLoading}
+
+      <main className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        <button
+          className="menu-toggle"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          ☰
+        </button>
+
+        {currentConversationId ? (
+          <ChatInterface
+            conversation={currentConversation}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+          />
+        ) : (
+          <div className="empty-state">
+            <h1>LLM Council</h1>
+            <p>Select a conversation or start a new one to begin.</p>
+            <button className="new-chat-btn" onClick={handleNewConversation}>
+              Start New Conversation
+            </button>
+          </div>
+        )}
+      </main>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onSettingsChanged={fetchAppSettings}
       />
     </div>
   );

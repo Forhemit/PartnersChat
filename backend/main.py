@@ -4,13 +4,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import uuid
 import json
 import asyncio
 
 from . import storage
 from .council import run_full_council, generate_conversation_title, stage1_collect_responses, stage2_collect_rankings, stage3_synthesize_final, calculate_aggregate_rankings
+from .config import settings, STANDARD_COUNCIL, FREE_COUNCIL, STANDARD_CHAIRMAN, FREE_CHAIRMAN
+from .openrouter import query_models_parallel
 
 app = FastAPI(title="LLM Council API")
 
@@ -42,6 +44,99 @@ class ConversationMetadata(BaseModel):
     message_count: int
 
 
+class ModelDefinitions(BaseModel):
+    paid: Dict[str, Any]
+    free: Dict[str, Any]
+
+
+class SettingsUpdateRequest(BaseModel):
+    openrouter_api_key: str
+    include_free_models: bool
+    timezone: str = "America/Los_Angeles"
+    definitions: Optional[ModelDefinitions] = None
+
+
+@app.get("/api/settings")
+async def get_settings():
+    """Get current settings."""
+    return {
+        "openrouter_api_key": settings.openrouter_api_key,
+        "include_free_models": settings.include_free_models,
+        "timezone": settings.timezone,
+        "council_models": settings.council_models,
+        "chairman_model": settings.chairman_model,
+        "definitions": {
+            "paid": {
+                "council": settings.paid_council_models,
+                "chairman": settings.paid_chairman_model
+            },
+            "free": {
+                "council": settings.free_council_models,
+                "chairman": settings.free_chairman_model
+            }
+        }
+    }
+
+
+@app.post("/api/settings")
+async def update_settings(request: SettingsUpdateRequest):
+    """Update settings."""
+    settings.openrouter_api_key = request.openrouter_api_key
+    settings.include_free_models = request.include_free_models
+    settings.timezone = request.timezone
+    
+    if request.definitions:
+        # Update paid definitions
+        if "paid" in request.definitions.dict():
+             paid = request.definitions.paid
+             if "council" in paid:
+                 settings.paid_council_models = paid["council"]
+             if "chairman" in paid:
+                 settings.paid_chairman_model = paid["chairman"]
+        
+        # Update free definitions
+        if "free" in request.definitions.dict():
+             free = request.definitions.free
+             if "council" in free:
+                 settings.free_council_models = free["council"]
+             if "chairman" in free:
+                 settings.free_chairman_model = free["chairman"]
+
+    return {"status": "ok", "settings": await get_settings()}
+
+
+class TestModelsRequest(BaseModel):
+    models: List[str]
+    prompt: str = "Hello, are you working?"
+
+
+@app.post("/api/settings/test")
+async def test_models(request: TestModelsRequest):
+    """Test specific models with a prompt."""
+    messages = [{"role": "user", "content": request.prompt}]
+    
+    # query_models_parallel returns Dict[model_name, response_dict | None]
+    results = await query_models_parallel(request.models, messages)
+    
+    formatted_results = []
+    for model in request.models:
+        response = results.get(model)
+        if response:
+            formatted_results.append({
+                "model": model,
+                "status": "success",
+                "response": response.get("content", "No content received")
+            })
+        else:
+             formatted_results.append({
+                "model": model,
+                "status": "error",
+                "response": "Failed to get response"
+            })
+            
+    return {"results": formatted_results}
+
+
 class Conversation(BaseModel):
     """Full conversation with all messages."""
     id: str
@@ -49,7 +144,11 @@ class Conversation(BaseModel):
     title: str
     messages: List[Dict[str, Any]]
 
-
+@app.get("/api/logs")
+async def get_logs():
+    """Get system logs."""
+    from . import storage
+    return {"logs": storage.get_logs()}
 @app.get("/")
 async def root():
     """Health check endpoint."""

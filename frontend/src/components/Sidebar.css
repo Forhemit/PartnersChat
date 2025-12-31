@@ -61,6 +61,51 @@
   background: #f0f0f0;
 }
 
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-clock {
+  padding: 0 15px 15px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.clock-time {
+  font-size: 20px;
+  font-weight: 500;
+  font-family: monospace;
+  color: #e2e8f0;
+}
+
+.clock-date {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.settings-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
 .conversation-item.active {
   background: #e8f0fe;
   border: 1px solid #4a90e2;

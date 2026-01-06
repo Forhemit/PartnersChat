@@ -57,6 +57,29 @@ COUNCIL_MODELS = [
 CHAIRMAN_MODEL = "google/gemini-3-pro-preview"
 ```
 
+
+## Recent Updates
+
+### Integrations System (January 2026)
+- **Calendar & Email Integrations:** Added new "Integrations" section in Settings with toggles for Google Calendar, Google Email, Outlook Calendar, and Outlook Email.
+- **Integration Indicators:** Visual "pill" notifications in the Proactive Agents sub-tab show which integrations are currently active.
+- **Persistent State:** Integration preferences are saved and persist across sessions.
+
+### Proactive Agents Enhancements (January 2026)
+- **Redesigned Daily Schedule UX:** Complete overhaul of the schedule selection system with four predefined options:
+  - **Single Notification:** One daily message at a specified time
+  - **Three Times Daily:** Morning, afternoon, and evening notifications
+  - **Hourly:** Notifications every hour during active hours
+  - **Custom:** User-defined multiple specific times
+- **Timezone Display:** System timezone is now displayed as read-only, serving as the single source of truth.
+- **Settings Reorganization:** Proactive Agent configuration moved to dedicated "Proactive Agents" sub-tab under Council Types.
+- **Backend Integration:** Full Convex schema support for structured schedule data model.
+
+### Chat Header Enhancements (January 2026)
+- **Moved Pills:** The "Council Type" and "Tier" pills have been moved to the right side of the chat header for a cleaner layout.
+- **Title Editing:** Added a direct edit functionality for the chat title. You can now rename your sessions directly from the header by clicking the pencil icon. The changes are immediately reflected in the sidebar.
+- **Backend Improvement:** Implemented `updateTitle` mutation in Convex to support real-time title updates.
+
 ## Running the Application
 
 **Option 1: Use the start script**

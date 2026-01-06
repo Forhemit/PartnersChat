@@ -4,6 +4,17 @@ from typing import List, Dict, Any, Tuple
 from .openrouter import query_models_parallel, query_model
 from .config import settings
 
+# --- Council Personality Definitions ---
+
+COUNCIL_PROMPTS = {
+    "standard": "You are a member of a professional Standard Board. Your goal is to provide balanced, professional, and thorough evaluations. Maintain a neutral, objective tone and focus on accuracy and completeness.",
+    "council": "You are a member of the LLM Council. Your goal is to contribute to the collective wisdom of the group. Evaluate responses based on how well they complement each other and provide a unique perspective. Focus on synthesis and consensus-building capability.",
+    "creative": "You are a member of a Creative Collective. Your goal is to think outside the box. Value imaginative, divergent, and novel approaches. Don't be afraid to suggest unconventional solutions or connections. Bonus points for uniqueness and flair.",
+    "strict": "You are a member of an Ethical Oversight Committee. Your primary goal is to ensure safety, compliance, and ethical alignment. Scrutinize responses for potential risks, bias, or harmful misunderstandings. Be rigorous and strict in your evaluation.",
+    "party": "You are at a Party! Your goal is to be fun, casual, and energetic. Bring good vibes and high energy to your evaluation. Use emojis, be enthusiastic, and focus on which response is the most engaging and delightful!"
+}
+
+
 
 async def stage1_collect_responses(user_query: str) -> List[Dict[str, Any]]:
     """
@@ -34,7 +45,8 @@ async def stage1_collect_responses(user_query: str) -> List[Dict[str, Any]]:
 
 async def stage2_collect_rankings(
     user_query: str,
-    stage1_results: List[Dict[str, Any]]
+    stage1_results: List[Dict[str, Any]],
+    council_type: str = "council"
 ) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
     """
     Stage 2: Each model ranks the anonymized responses.
@@ -61,7 +73,11 @@ async def stage2_collect_rankings(
         for label, result in zip(labels, stage1_results)
     ])
 
-    ranking_prompt = f"""You are evaluating different responses to the following question:
+    personality_instruction = COUNCIL_PROMPTS.get(council_type, COUNCIL_PROMPTS["council"])
+
+    ranking_prompt = f"""{personality_instruction}
+
+You are evaluating different responses to the following question:
 
 Question: {user_query}
 
@@ -115,7 +131,8 @@ Now provide your evaluation and ranking:"""
 async def stage3_synthesize_final(
     user_query: str,
     stage1_results: List[Dict[str, Any]],
-    stage2_results: List[Dict[str, Any]]
+    stage2_results: List[Dict[str, Any]],
+    council_type: str = "council"
 ) -> Dict[str, Any]:
     """
     Stage 3: Chairman synthesizes final response.
@@ -139,7 +156,11 @@ async def stage3_synthesize_final(
         for result in stage2_results
     ])
 
-    chairman_prompt = f"""You are the Chairman of an LLM Council. Multiple AI models have provided responses to a user's question, and then ranked each other's responses.
+    personality_instruction = COUNCIL_PROMPTS.get(council_type, COUNCIL_PROMPTS["council"])
+    
+    chairman_prompt = f"""{personality_instruction}
+    
+You are the Chairman of this group. Multiple AI models have provided responses to a user's question, and then ranked each other's responses.
 
 Original Question: {user_query}
 
@@ -293,7 +314,10 @@ Title:"""
     return title
 
 
-async def run_full_council(user_query: str) -> Tuple[List, List, Dict, Dict]:
+async def run_full_council(
+    user_query: str,
+    council_type: str = "council"
+) -> Tuple[List, List, Dict, Dict]:
     """
     Run the complete 3-stage council process.
 
@@ -314,7 +338,11 @@ async def run_full_council(user_query: str) -> Tuple[List, List, Dict, Dict]:
         }, {}
 
     # Stage 2: Collect rankings
-    stage2_results, label_to_model = await stage2_collect_rankings(user_query, stage1_results)
+    stage2_results, label_to_model = await stage2_collect_rankings(
+        user_query, 
+        stage1_results,
+        council_type=council_type
+    )
 
     # Calculate aggregate rankings
     aggregate_rankings = calculate_aggregate_rankings(stage2_results, label_to_model)
@@ -323,7 +351,8 @@ async def run_full_council(user_query: str) -> Tuple[List, List, Dict, Dict]:
     stage3_result = await stage3_synthesize_final(
         user_query,
         stage1_results,
-        stage2_results
+        stage2_results,
+        council_type=council_type
     )
 
     # Prepare metadata

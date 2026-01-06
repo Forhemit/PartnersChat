@@ -80,6 +80,13 @@ CHAIRMAN_MODEL = "google/gemini-3-pro-preview"
 - **Title Editing:** Added a direct edit functionality for the chat title. You can now rename your sessions directly from the header by clicking the pencil icon. The changes are immediately reflected in the sidebar.
 - **Backend Improvement:** Implemented `updateTitle` mutation in Convex to support real-time title updates.
 
+### Chat Styling Overhaul (January 2026)
+- **Minimalist Message Design:** Removed "message bubbles" and background colors in favor of a clean, text-driven interface. Differentiates speakers via color instead of containers.
+- **Theme-Aware Colors:** Semantic CSS variables (`--user-chat` and `--agent-chat`) allow chat text to adapt perfectly to Light, Dark, Race (Red/White), and Party (Pink/White) modes.
+- **Improved Indentation:** Added significant indentation to chat message content relative to speaker labels, creating a clear visual hierarchy.
+- **Personalized Experience:** Replaced generic "You" and "The Query" labels with the user's actual profile name (e.g., "Stephen", "Stephen's Query").
+
+
 ## Running the Application
 
 **Option 1: Use the start script**

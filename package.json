@@ -1,20 +1,16 @@
 {
-  "name": "partners-chat",
-  "version": "1.0.0",
-  "description": "LLM Council - Multi-model deliberation system",
-  "scripts": {
-    "dev": "npm run dev:backend & npm run dev:frontend",
-    "dev:backend": "uv run python -m backend.main",
-    "dev:frontend": "cd frontend && npm run dev",
-    "start": "./start.sh",
-    "install:frontend": "cd frontend && npm install"
-  },
-  "keywords": [
-    "llm",
-    "ai",
-    "council",
-    "deliberation"
-  ],
-  "author": "",
-  "license": "MIT"
+    "name": "partners-chat-root",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "npm run dev --prefix PartnerChatApp",
+        "build": "npm run build --prefix PartnerChatApp",
+        "start": "npm run start --prefix PartnerChatApp",
+        "lint": "npm run lint --prefix PartnerChatApp",
+        "convex:dev": "npm run convex:dev --prefix PartnerChatApp",
+        "convex:deploy": "npm run convex:deploy --prefix PartnerChatApp",
+        "sb:login": "npm run sb:login --prefix PartnerChatApp",
+        "sb:start": "npm run sb:start --prefix PartnerChatApp",
+        "sb:gen-types": "npm run sb:gen-types --prefix PartnerChatApp"
+    }
 }

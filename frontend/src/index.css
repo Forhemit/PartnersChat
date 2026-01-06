@@ -7,6 +7,40 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Light Theme (Default) */
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #fafafa;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
+  --primary-color: #4a90e2;
+  --primary-hover: #357abd;
+  --accent-color: #f0f7ff;
+  --success-bg: #f0fff0;
+  --success-border: #c8e6c8;
+  --success-text: #2d8a2d;
+  --code-bg: #f5f5f5;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark Theme Overrides */
+:root[data-theme="dark"] {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #252525;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #333333;
+  --primary-color: #5b9fe8;
+  --primary-hover: #4a90e2;
+  --accent-color: #1e293b;
+  --success-bg: #1a2f1a;
+  --success-border: #2d5a2d;
+  --success-text: #86efac;
+  --code-bg: #2d2d2d;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -19,7 +53,9 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 #root {
@@ -35,6 +71,7 @@ body {
 
 .markdown-content p {
   margin: 0 0 12px 0;
+  color: var(--text-primary);
 }
 
 .markdown-content p:last-child {
@@ -48,6 +85,7 @@ body {
 .markdown-content h5,
 .markdown-content h6 {
   margin: 16px 0 8px 0;
+  color: var(--text-primary);
 }
 
 .markdown-content h1:first-child,
@@ -63,6 +101,7 @@ body {
 .markdown-content ol {
   margin: 0 0 12px 0;
   padding-left: 24px;
+  color: var(--text-primary);
 }
 
 .markdown-content li {
@@ -70,19 +109,21 @@ body {
 }
 
 .markdown-content pre {
-  background: #f5f5f5;
+  background: var(--code-bg);
   padding: 12px;
   border-radius: 4px;
   overflow-x: auto;
   margin: 0 0 12px 0;
+  border: 1px solid var(--border-color);
 }
 
 .markdown-content code {
-  background: #f5f5f5;
+  background: var(--code-bg);
   padding: 2px 6px;
   border-radius: 3px;
   font-family: monospace;
   font-size: 0.9em;
+  color: var(--text-primary);
 }
 
 .markdown-content pre code {
@@ -93,6 +134,6 @@ body {
 .markdown-content blockquote {
   margin: 0 0 12px 0;
   padding-left: 16px;
-  border-left: 4px solid #ddd;
-  color: #666;
+  border-left: 4px solid var(--border-color);
+  color: var(--text-secondary);
 }

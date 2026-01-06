@@ -1,23 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
 import SettingsModal from './components/SettingsModal';
 import { api } from './api';
 import './App.css';
+import { useTheme } from './hooks/useTheme';
+import { ToastProvider } from './context/ToastContext';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
-function App() {
+function AppContent() {
+  const { theme, toggleTheme } = useTheme();
   const [conversations, setConversations] = useState([]);
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // New state for sidebar
-  const [appSettings, setAppSettings] = useState(null); // New state for app settings
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [appSettings, setAppSettings] = useState(null);
+
+  const chatInputRef = useRef(null);
+
+  // Keyboard Shortcuts
+  useKeyboardShortcuts({
+    onEscape: () => {
+      if (isSettingsOpen) setIsSettingsOpen(false);
+      // else could blur input, but default behavior is fine
+    },
+    onSlash: () => {
+      if (chatInputRef.current) {
+        chatInputRef.current.focus();
+      }
+    }
+  });
 
   // Load conversations and app settings on mount
   useEffect(() => {
     loadConversations();
-    fetchAppSettings(); // Fetch app settings
+    fetchAppSettings();
   }, []);
 
   // Load conversation details when selected
@@ -67,6 +86,8 @@ function App() {
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
       }
+      // Focus input on new chat
+      setTimeout(() => chatInputRef.current?.focus(), 100);
     } catch (error) {
       console.error('Failed to create conversation:', error);
     }
@@ -215,6 +236,8 @@ function App() {
         onClose={() => setIsSidebarOpen(false)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         timezone={appSettings?.timezone}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       <main className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
@@ -230,6 +253,7 @@ function App() {
             conversation={currentConversation}
             onSendMessage={handleSendMessage}
             isLoading={isLoading}
+            inputRef={chatInputRef} // Pass ref
           />
         ) : (
           <div className="empty-state">
@@ -251,4 +275,10 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
+  );
+}

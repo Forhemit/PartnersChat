@@ -1,17 +1,10 @@
-* {
-  box-sizing: border-box;
-}
-
 .app-container {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: #ffffff;
-  color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .main-content {
@@ -21,6 +14,7 @@
   height: 100%;
   position: relative;
   transition: margin-left 0.3s ease;
+  background: var(--bg-secondary);
 }
 
 .menu-toggle {
@@ -28,17 +22,26 @@
   top: 10px;
   left: 10px;
   z-index: 100;
-  background: none;
-  border: none;
-  font-size: 24px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  font-size: 20px;
   cursor: pointer;
-  color: #666;
-  padding: 5px;
+  color: var(--text-secondary);
+  padding: 5px 10px;
   border-radius: 4px;
+  display: none;
+  /* Hidden by default on desktop if sidebar is persistent */
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
 }
 
 .menu-toggle:hover {
-  background: #f0f0f0;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .empty-state {
@@ -48,32 +51,17 @@
   justify-content: center;
   height: 100%;
   text-align: center;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .empty-state h1 {
   font-size: 2rem;
   margin-bottom: 1rem;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .empty-state p {
   margin-bottom: 2rem;
-}
-
-.new-chat-btn {
-  padding: 10px 20px;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.new-chat-btn:hover {
-  background-color: #1d4ed8;
 }
 
 /* Mobile responsive adjustments */

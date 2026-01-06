@@ -1,0 +1,54 @@
+.collapsible-stage {
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.stage-header-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border: none;
+    border-bottom: 1px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.stage-header-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.collapsible-stage:has(.stage-content-wrapper) .stage-header-btn {
+    border-bottom-color: var(--border-color);
+}
+
+.stage-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stage-content-wrapper {
+    padding: 0;
+}
+
+/* Override internal stage headers since we have a collapsible header now */
+.stage-content-wrapper .stage h3.stage-title {
+    display: none;
+}
+
+.stage-content-wrapper .stage {
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    border-radius: 0;
+}
